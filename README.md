@@ -7,7 +7,7 @@ A sophisticated mental health companion app built with modern microservices arch
 ### Modern Microservices Design
 - **Frontend**: React + TypeScript + Vite + Tailwind CSS
 - **Backend API**: FastAPI + Pydantic + JWT Authentication
-- **LLM Microservice**: OpenAI GPT integration for AI-powered features
+- **LLM Microservice**: ollama integration for AI-powered features
 - **Database**: Redis for caching and session management
 - **Containerization**: Docker + Docker Compose for easy deployment
 
@@ -78,7 +78,7 @@ safespace/
 ## 🤖 AI Integration
 
 ### LLM Microservice Features
-- **Intelligent Playlist Generation**: Uses GPT to create mood-appropriate music recommendations
+- **Intelligent Playlist Generation**: Uses ollama to create mood-appropriate music recommendations
 - **Personalized Affirmations**: AI-generated supportive messages based on emotional state
 - **Mood Analysis**: Advanced pattern recognition for emotional insights
 - **Fallback Systems**: Rule-based alternatives ensure reliability
@@ -95,22 +95,6 @@ The LLM service seamlessly integrates with the main backend to provide:
 - **Crisis Detection**: Automatic referral to professional resources
 - **Data Privacy**: Local storage with optional cloud sync
 - **Secure Authentication**: JWT-based user sessions
-
-## 🎯 Technical Highlights
-
-### Modern Software Engineering
-- **Microservices Architecture**: Scalable, maintainable service separation
-- **API-First Design**: RESTful APIs with OpenAPI documentation
-- **Containerization**: Docker for consistent deployment
-- **Type Safety**: TypeScript frontend, Pydantic backend validation
-- **AI Integration**: OpenAI GPT for intelligent features
-
-### Production Ready
-- **Health Checks**: Service monitoring and status endpoints
-- **Error Handling**: Graceful degradation and fallback systems
-- **Caching**: Redis for performance optimization
-- **CORS Configuration**: Secure cross-origin resource sharing
-- **Environment Management**: Configurable for different deployment stages
 
 ## 📊 Use Cases
 
