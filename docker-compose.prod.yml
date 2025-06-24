@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "80:3000"
+    environment:
+      - VITE_API_URL=https://api.safespace.app
+      - VITE_LLM_SERVICE_URL=https://llm.safespace.app
+    depends_on:
+      - backend
+      - llm-service
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - LLM_SERVICE_URL=http://llm-service:8001
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+
+  llm-service:
+    build:
+      context: ./llm-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY}
+    deploy:
+      replicas: 2
+      resources:
+        reservations:
+          memory: 2G
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    deploy:
+      replicas: 1
+
+volumes:
+  redis_data:

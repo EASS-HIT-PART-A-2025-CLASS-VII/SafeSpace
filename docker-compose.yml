@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Frontend Service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_LLM_SERVICE_URL=http://localhost:8001
+    depends_on:
+      - backend
+      - llm-service
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=your-super-secret-key-change-in-production
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - LLM_SERVICE_URL=http://llm-service:8001
+    depends_on:
+      - redis
+    volumes:
+      - ./backend:/app
+      - ./backend/data:/app/data
+
+  # LLM Microservice
+  llm-service:
+    build:
+      context: ./llm-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HUGGINGFACE_API_KEY=${HUGGINGFACE_API_KEY}
+    volumes:
+      - ./llm-service:/app
+    deploy:
+      resources:
+        reservations:
+          memory: 2G
+
+  # Redis for caching and session storage
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
