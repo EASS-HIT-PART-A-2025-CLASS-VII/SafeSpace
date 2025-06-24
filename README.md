@@ -2,6 +2,8 @@
 
 A sophisticated mental health companion app built with modern microservices architecture, featuring AI-powered mood analysis, personalized playlist generation, and therapeutic activities.
 
+![The name is SafeSpace, it a mental health app, and theme color is baby yellow](https://github.com/user-attachments/assets/8bcfd4e9-106b-400a-b7ef-24a3e3349224)
+
 ## 🏗️ Architecture
 
 ### Modern Microservices Design
