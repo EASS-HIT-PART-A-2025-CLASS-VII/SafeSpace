@@ -4,23 +4,15 @@ import { MoodType } from '../types';
 import { moodColors } from '../utils/moodContent';
 
 interface Track {
-  id: string;
   title: string;
   artist: string;
-  duration: number;
-  url: string;
-  preview_url?: string;
-  image_url?: string;
 }
 
 interface Playlist {
-  id: string;
-  name: string;
+  songs: Track[];
+  playlist_name: string;
   description: string;
-  tracks: Track[];
-  total_duration: number;
-  mood_type: MoodType;
-  intensity: number;
+  mood_description: string;
 }
 
 interface MusicPlayerProps {
@@ -46,21 +38,19 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
   const generatePlaylist = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      // Get auth token from localStorage (you'll need to implement auth)
-      const token = localStorage.getItem('auth_token');
-      
-      const response = await fetch('/api/music/playlist', {
+      // Use the correct backend URL
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+      const response = await fetch(`${apiUrl}/api/music/playlist`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           mood_type: mood,
           intensity: intensity,
-          source: 'spotify',
+          source: 'ai',
           duration_minutes: 30
         })
       });
@@ -70,9 +60,21 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
       }
 
       const playlistData = await response.json();
-      setPlaylist(playlistData);
-      
-      if (playlistData.tracks.length > 0) {
+
+      // Extract the AI-generated songs
+      const aiPlaylist: Playlist = {
+        songs: playlistData.tracks.map((track: any) => ({
+          title: track.title,
+          artist: track.artist
+        })),
+        playlist_name: playlistData.name,
+        description: playlistData.description,
+        mood_description: `AI-curated music for your ${mood} mood`
+      };
+
+      setPlaylist(aiPlaylist);
+
+      if (aiPlaylist.songs.length > 0) {
         setCurrentTrack(0);
       }
     } catch (err) {
@@ -85,13 +87,13 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
 
   // Simulate audio playback
   useEffect(() => {
-    if (isPlaying && playlist?.tracks[currentTrack]) {
+    if (isPlaying && playlist?.songs[currentTrack]) {
       const interval = setInterval(() => {
         setProgress(prev => {
-          const trackDuration = playlist.tracks[currentTrack].duration;
+          const trackDuration = 180; // 3 minutes default
           if (prev >= trackDuration) {
             // Auto-advance to next track
-            if (currentTrack < playlist.tracks.length - 1) {
+            if (currentTrack < playlist.songs.length - 1) {
               setCurrentTrack(prev => prev + 1);
               return 0;
             } else {
@@ -111,7 +113,7 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
   };
 
   const handleNextTrack = () => {
-    if (playlist && currentTrack < playlist.tracks.length - 1) {
+    if (playlist && currentTrack < playlist.songs.length - 1) {
       setCurrentTrack(prev => prev + 1);
       setProgress(0);
     }
@@ -130,14 +132,14 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const currentTrackData = playlist?.tracks[currentTrack];
+  const currentTrackData = playlist?.songs[currentTrack];
 
   if (isLoading) {
     return (
       <div className={`min-h-screen bg-gradient-to-br ${moodColors[mood]} p-4 flex items-center justify-center`}>
         <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 text-center">
           <Loader className="w-12 h-12 animate-spin text-emerald-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Creating Your Playlist</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Creating Your AI Playlist</h2>
           <p className="text-gray-600">AI is curating the perfect music for your {mood} mood...</p>
         </div>
       </div>
@@ -180,11 +182,11 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
           <>
             {/* Playlist Info */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-2">{playlist.name}</h2>
+              <h2 className="text-lg font-semibold text-gray-800 mb-2">{playlist.playlist_name}</h2>
               <p className="text-gray-600 text-sm mb-4">{playlist.description}</p>
               <div className="flex justify-between text-sm text-gray-500">
-                <span>{playlist.tracks.length} tracks</span>
-                <span>{formatTime(playlist.total_duration)}</span>
+                <span>{playlist.songs.length} AI-curated tracks</span>
+                <span>🤖 Generated by AI</span>
               </div>
             </div>
 
@@ -192,16 +194,12 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
             {currentTrackData && (
               <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 mb-6">
                 <div className="flex items-center space-x-4 mb-4">
-                  {currentTrackData.image_url && (
-                    <img
-                      src={currentTrackData.image_url}
-                      alt={currentTrackData.title}
-                      className="w-16 h-16 rounded-xl object-cover"
-                    />
-                  )}
+                  <div className="w-16 h-16 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-xl flex items-center justify-center">
+                    <span className="text-2xl">🎵</span>
+                  </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-800 truncate">{currentTrackData.title}</h3>
-                    <p className="text-gray-600 text-sm truncate">{currentTrackData.artist}</p>
+                    <h3 className="font-semibold text-gray-800">{currentTrackData.title}</h3>
+                    <p className="text-gray-600 text-sm">{currentTrackData.artist}</p>
                   </div>
                 </div>
 
@@ -209,12 +207,12 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
                 <div className="mb-4">
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
                     <span>{formatTime(progress)}</span>
-                    <span>{formatTime(currentTrackData.duration)}</span>
+                    <span>3:00</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-emerald-400 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${(progress / currentTrackData.duration) * 100}%` }}
+                      style={{ width: `${(progress / 180) * 100}%` }}
                     />
                   </div>
                 </div>
@@ -242,7 +240,7 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
 
                   <button
                     onClick={handleNextTrack}
-                    disabled={currentTrack === playlist.tracks.length - 1}
+                    disabled={currentTrack === playlist.songs.length - 1}
                     className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <SkipForward className="w-5 h-5 text-gray-600" />
@@ -286,11 +284,11 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
 
             {/* Track List */}
             <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4">
-              <h3 className="font-semibold text-gray-800 mb-3">Playlist</h3>
+              <h3 className="font-semibold text-gray-800 mb-3">AI Playlist</h3>
               <div className="space-y-2 max-h-64 overflow-y-auto">
-                {playlist.tracks.map((track, index) => (
+                {playlist.songs.map((track, index) => (
                   <button
-                    key={track.id}
+                    key={index}
                     onClick={() => {
                       setCurrentTrack(index);
                       setProgress(0);
@@ -313,7 +311,7 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
                         <p className="font-medium text-gray-800 truncate">{track.title}</p>
                         <p className="text-sm text-gray-600 truncate">{track.artist}</p>
                       </div>
-                      <span className="text-xs text-gray-500">{formatTime(track.duration)}</span>
+                      <span className="text-xs text-gray-500">3:00</span>
                     </div>
                   </button>
                 ))}
