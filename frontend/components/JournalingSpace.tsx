@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, Save, BookOpen } from 'lucide-react';
 import { MoodType, JournalEntry } from '../types';
 import { moodColors } from '../utils/moodContent';
@@ -84,6 +84,15 @@ export default function JournalingSpace({ mood, prompt, onBack }: JournalingSpac
     setShowPrompts(false);
   };
 
+  // Helper function to safely convert timestamp to Date
+  const getEntryDate = (entry: JournalEntry): Date => {
+    if (entry.timestamp instanceof Date) {
+      return entry.timestamp;
+    }
+    // If timestamp is a string, convert it to Date
+    return new Date(entry.timestamp);
+  };
+
   return (
     <div className={`min-h-screen bg-gradient-to-br ${moodColors[mood]} p-4`}>
       <div className="max-w-md mx-auto">
@@ -134,7 +143,7 @@ export default function JournalingSpace({ mood, prompt, onBack }: JournalingSpac
             placeholder="Let your thoughts flow freely..."
             className="w-full h-64 p-4 border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent text-gray-700 leading-relaxed"
           />
-          
+
           <div className="flex justify-between items-center mt-4">
             <p className="text-sm text-gray-500">
               {currentEntry.length} characters
@@ -160,16 +169,19 @@ export default function JournalingSpace({ mood, prompt, onBack }: JournalingSpac
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4">
             <h3 className="font-semibold text-gray-800 mb-3">Recent Entries</h3>
             <div className="space-y-3 max-h-48 overflow-y-auto">
-              {entries.slice(0, 5).map((entry) => (
-                <div key={entry.id} className="p-3 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-700 line-clamp-2">
-                    {entry.content.substring(0, 100)}...
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {entry.timestamp.toLocaleDateString()} • {entry.mood}
-                  </p>
-                </div>
-              ))}
+              {entries.slice(0, 5).map((entry) => {
+                const entryDate = getEntryDate(entry);
+                return (
+                  <div key={entry.id} className="p-3 bg-gray-50 rounded-xl">
+                    <p className="text-sm text-gray-700 line-clamp-2">
+                      {entry.content.substring(0, 100)}...
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {entryDate.toLocaleDateString()} • {entry.mood}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
