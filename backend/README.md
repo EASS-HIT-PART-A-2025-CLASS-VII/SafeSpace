@@ -4,7 +4,6 @@ A FastAPI backend for mood-based music recommendations and mental health support
 
 ## Features
 
-- **Authentication**: User registration and login with JWT tokens
 - **Mood Analysis**: Parse mood from text, voice, or quiz inputs
 - **AI Suggestions**: Intelligent activity suggestions based on mood and intensity
 
