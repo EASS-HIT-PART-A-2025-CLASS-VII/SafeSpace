@@ -105,7 +105,7 @@ async def generate_playlist(request: PlaylistRequest):
                     "genres": request.genres,
                     "duration_minutes": request.duration_minutes or 30
                 },
-                timeout=80
+                timeout=300
             )
 
             if llm_response.status_code == 200:
@@ -165,7 +165,7 @@ async def get_ai_affirmations(mood_type: str, intensity: int):
                     "user_name": "Friend",
                     "context": f"User feeling {mood_type} at intensity {intensity}"
                 },
-                timeout=80
+                timeout=300
             )
 
             if response.status_code == 200:
@@ -184,4 +184,4 @@ async def get_ai_affirmations(mood_type: str, intensity: int):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

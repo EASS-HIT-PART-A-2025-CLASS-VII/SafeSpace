@@ -41,7 +41,7 @@ export default function MusicPlayer({ mood, intensity, onBack }: MusicPlayerProp
 
     try {
       // Use the correct backend URL
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/api/music/playlist`, {
         method: 'POST',
         headers: {

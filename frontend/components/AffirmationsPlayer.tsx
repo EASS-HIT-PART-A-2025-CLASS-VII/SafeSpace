@@ -43,7 +43,7 @@ export default function AffirmationsPlayer({ mood, intensity, onBack }: Affirmat
 
     try {
       // Use the correct backend URL
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/api/ai/affirmations?mood_type=${mood}&intensity=${intensity}`, {
         method: 'POST',
         headers: {

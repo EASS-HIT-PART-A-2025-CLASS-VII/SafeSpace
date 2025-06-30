@@ -15,8 +15,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
+# Copy startup script and make it executable
+COPY start.sh .
+RUN chmod +x start.sh
+
 # Expose port
 EXPOSE 8080
 
-# Start Ollama service and pull model, then start the app
-CMD ["sh", "-c", "ollama serve & sleep 10 && ollama pull gemma:2b && uvicorn main:app --host 0.0.0.0 --port 8080"]
+# Use startup script as the container entrypoint
+CMD ["./start.sh"]

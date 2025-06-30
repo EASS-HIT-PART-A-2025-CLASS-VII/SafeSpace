@@ -80,7 +80,7 @@ class LLMService:
                 capture_output=True,
                 text=True,
                 encoding='utf-8',
-                timeout=80
+                timeout=300
             )
             if result.returncode != 0:
                 raise Exception("LLM process failed")
