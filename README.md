@@ -23,6 +23,11 @@ A sophisticated mental health companion app built with modern microservices arch
 - ✨ **Joy Jar**: Capture and revisit happy moments
 - 🎧 **Audio Therapy**: Curated soundscapes for different moods
 
+## Demo
+youtube link
+
+![image](https://github.com/user-attachments/assets/4eaf75cc-e176-4128-add8-9d0a8182431c)
+
 ## 🚀 Quick Start
 
 ### Prerequisites
