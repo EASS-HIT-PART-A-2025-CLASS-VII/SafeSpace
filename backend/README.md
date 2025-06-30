@@ -21,8 +21,12 @@ uvicorn main:app --reload
 
 ## API Endpoints
 
+### Health
+
+- `POST /health` - Verify the state of the backend
+
 ### Mood Analysis
-- `POST /mood/analyze` - Analyze mood and get suggestions
+- `POST /api/mood/analyze` - Analyze mood and get suggestions
 
 ### Music
 - `POST /api/music/playlist` - Generate mood-based playlist
