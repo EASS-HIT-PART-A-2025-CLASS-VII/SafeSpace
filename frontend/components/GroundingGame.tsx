@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, RotateCcw } from 'lucide-react';
 import { MoodType } from '../types';
 import { moodColors } from '../utils/moodContent';

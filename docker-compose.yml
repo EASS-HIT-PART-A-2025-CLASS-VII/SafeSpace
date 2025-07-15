@@ -1,6 +1,20 @@
 version: '3.8'
 
 services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=safespace
+    volumes:
+      - mongodb_data:/data/db
+    deploy:
+      resources:
+        reservations:
+          memory: 512M
+
   # Frontend Service
   frontend:
     build:
@@ -13,7 +27,7 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./frontend:/app
+      - .:/app
       - /app/node_modules
 
   # Backend Service
@@ -23,9 +37,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    environment:
-      - LLM_SERVICE_URL=http://llm-service:8080
+    env_file:
+      - ./backend/.env
     depends_on:
+      - mongodb
       - llm-service
     volumes:
       - ./backend:/app
@@ -46,4 +61,5 @@ services:
           memory: 4G
 
 volumes:
+  mongodb_data:
   ollama_data:

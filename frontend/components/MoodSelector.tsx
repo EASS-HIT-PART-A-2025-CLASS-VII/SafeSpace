@@ -1,10 +1,12 @@
 import React from 'react';
-import { Heart, Meh, Frown, Smile, Zap, Bed, HelpCircle } from 'lucide-react';
+import { Heart, Meh, Frown, Smile, Zap, Bed, HelpCircle, LogOut } from 'lucide-react';
 import { MoodType } from '../types';
-import { moodColors, moodEmojis } from '../utils/moodContent';
+import { moodEmojis } from '../utils/moodContent';
 
 interface MoodSelectorProps {
   onMoodSelect: (mood: MoodType, intensity: number) => void;
+  user?: { name: string };
+  onLogout?: () => void;
 }
 
 const moodOptions: Array<{ mood: MoodType; label: string; icon: React.ReactNode; color: string }> = [
@@ -17,7 +19,7 @@ const moodOptions: Array<{ mood: MoodType; label: string; icon: React.ReactNode;
   { mood: 'mixed', label: 'Mixed', icon: <HelpCircle className="w-6 h-6" />, color: 'text-teal-600' }
 ];
 
-export default function MoodSelector({ onMoodSelect }: MoodSelectorProps) {
+export default function MoodSelector({ onMoodSelect, user, onLogout }: MoodSelectorProps) {
   const [selectedMood, setSelectedMood] = React.useState<MoodType | null>(null);
   const [intensity, setIntensity] = React.useState(5);
 
@@ -34,6 +36,19 @@ export default function MoodSelector({ onMoodSelect }: MoodSelectorProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+        {user && onLogout && (
+          <div className="flex justify-between items-center mb-4">
+            <p className="text-sm text-gray-600">Welcome back, {user.name}!</p>
+            <button
+              onClick={onLogout}
+              className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">SafeSpace</h1>
           <p className="text-gray-600">How are you feeling right now?</p>
