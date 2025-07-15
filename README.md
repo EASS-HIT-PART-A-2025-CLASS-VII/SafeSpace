@@ -27,7 +27,7 @@ A sophisticated mental health companion app built with modern microservices arch
 - 🎧 **Audio Therapy**: Curated soundscapes for different moods
 
 ## 🎥 Demo
-[Demo link](https://youtu.be/2q8UeEHBX70)
+[Demo link](https://youtu.be/qrEJ1z77TYM)
 
 ![image](https://github.com/user-attachments/assets/4eaf75cc-e176-4128-add8-9d0a8182431c)
 
