@@ -19,7 +19,7 @@ from models.user import (
 )
 from models.schemas import (
     MoodInput, PlaylistRequest,
-    PlaylistResponse, MoodSuggestionResponse
+    PlaylistResponse, MoodSuggestionResponse, Track
 )
 
 load_dotenv()
