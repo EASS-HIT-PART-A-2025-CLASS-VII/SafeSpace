@@ -31,9 +31,6 @@ uvicorn main:app --reload
 ### Music
 - `POST /api/music/playlist` - Generate mood-based playlist
 
-### AI-Powered Affirmations
-- `POST /api/ai/affirmations` – Generate affirmations based on mood type and intensity
-
 ## Architecture
 
 - **Backend**: FastAPI with Pydantic for request validation

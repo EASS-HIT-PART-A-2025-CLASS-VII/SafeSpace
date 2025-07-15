@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Save, BookOpen } from 'lucide-react';
 import { MoodType, JournalEntry } from '../types';
 import { moodColors } from '../utils/moodContent';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface JournalingSpaceProps {
   mood: MoodType;
@@ -56,27 +55,78 @@ const journalPrompts: Record<MoodType, string[]> = {
 };
 
 export default function JournalingSpace({ mood, prompt, onBack }: JournalingSpaceProps) {
-  const [entries, setEntries] = useLocalStorage<JournalEntry[]>('journal-entries', []);
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [currentEntry, setCurrentEntry] = useState('');
   const [selectedPrompt, setSelectedPrompt] = useState(prompt || '');
   const [showPrompts, setShowPrompts] = useState(!prompt);
   const [savedMessage, setSavedMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSave = () => {
+  // Load journal entries from database
+  useEffect(() => {
+    loadJournalEntries();
+  }, []);
+
+  const loadJournalEntries = async () => {
+    try {
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${apiUrl}/api/journal/entries`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const journalEntries = data.entries.map((entry: any) => ({
+          id: entry._id,
+          content: entry.content,
+          prompt: entry.prompt,
+          mood: entry.mood,
+          timestamp: new Date(entry.timestamp)
+        }));
+        setEntries(journalEntries);
+      }
+    } catch (error) {
+      console.error('Failed to load journal entries:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
     if (!currentEntry.trim()) return;
 
-    const newEntry: JournalEntry = {
-      id: Date.now().toString(),
-      content: currentEntry,
-      prompt: selectedPrompt,
-      mood,
-      timestamp: new Date()
-    };
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${apiUrl}/api/journal/entries`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          content: currentEntry,
+          prompt: selectedPrompt,
+          mood: mood,
+        }),
+      });
 
-    setEntries(prev => [newEntry, ...prev]);
-    setSavedMessage('Entry saved! 💚');
-    setTimeout(() => setSavedMessage(''), 3000);
-    setCurrentEntry('');
+      if (response.ok) {
+        // Reload entries from database
+        await loadJournalEntries();
+        setSavedMessage('Entry saved! 💚');
+        setTimeout(() => setSavedMessage(''), 3000);
+        setCurrentEntry('');
+      }
+    } catch (error) {
+      console.error('Failed to save journal entry:', error);
+      setSavedMessage('Failed to save entry. Please try again.');
+      setTimeout(() => setSavedMessage(''), 3000);
+    }
   };
 
   const selectPrompt = (newPrompt: string) => {
@@ -168,21 +218,25 @@ export default function JournalingSpace({ mood, prompt, onBack }: JournalingSpac
         {entries.length > 0 && (
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4">
             <h3 className="font-semibold text-gray-800 mb-3">Recent Entries</h3>
-            <div className="space-y-3 max-h-48 overflow-y-auto">
-              {entries.slice(0, 5).map((entry) => {
-                const entryDate = getEntryDate(entry);
-                return (
-                  <div key={entry.id} className="p-3 bg-gray-50 rounded-xl">
-                    <p className="text-sm text-gray-700 line-clamp-2">
-                      {entry.content.substring(0, 100)}...
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {entryDate.toLocaleDateString()} • {entry.mood}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
+            {isLoading ? (
+              <p className="text-gray-600 text-center">Loading entries...</p>
+            ) : (
+              <div className="space-y-3 max-h-48 overflow-y-auto">
+                {entries.slice(0, 5).map((entry) => {
+                  const entryDate = getEntryDate(entry);
+                  return (
+                    <div key={entry.id} className="p-3 bg-gray-50 rounded-xl">
+                      <p className="text-sm text-gray-700 line-clamp-2">
+                        {entry.content.substring(0, 100)}...
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {entryDate.toLocaleDateString()} • {entry.mood}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Activity, MessageCircle, BookOpen, Music, Heart } from 'lucide-react';
+import { ArrowLeft, Activity, BookOpen, Music, Heart } from 'lucide-react';
 import { MoodType, ActivityContent } from '../types';
 import { moodColors, moodActivities } from '../utils/moodContent';
 

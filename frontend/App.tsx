@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AuthPage from './components/AuthPage';
 import MoodSelector from './components/MoodSelector';
 import MoodContent from './components/MoodContent';
 import BreathingExercise from './components/BreathingExercise';
@@ -11,7 +12,13 @@ import AffirmationsPlayer from './components/AffirmationsPlayer';
 import { MoodType, MoodEntry, ActivityContent } from './types';
 import { useLocalStorage } from './hooks/useLocalStorage';
 
-type AppState = 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
+type AppState =
   | { stage: 'mood-selection' }
   | { stage: 'mood-content'; mood: MoodType; intensity: number }
   | { stage: 'breathing'; mood: MoodType; duration: number }
@@ -24,8 +31,16 @@ type AppState =
 
 function App() {
   const [appState, setAppState] = useState<AppState>({ stage: 'mood-selection' });
+  const [user, setUser] = useState<User | null>(() => {
+    const userData = localStorage.getItem('user_data');
+    const token = localStorage.getItem('auth_token');
+    return userData && token ? JSON.parse(userData) : null;
+  });
   const [moodHistory, setMoodHistory] = useLocalStorage<MoodEntry[]>('mood-history', []);
 
+  const handleLogin = (userData: User) => {
+    setUser(userData);
+  };
   const handleMoodSelect = (mood: MoodType, intensity: number) => {
     // Save mood entry
     const moodEntry: MoodEntry = {
@@ -46,15 +61,15 @@ function App() {
 
     switch (activity.type) {
       case 'breathing':
-        setAppState({ 
-          stage: 'breathing', 
-          mood, 
-          duration: activity.duration || 300 
+        setAppState({
+          stage: 'breathing',
+          mood,
+          duration: activity.duration || 300
         });
         break;
       case 'journal':
-        setAppState({ 
-          stage: 'journal', 
+        setAppState({
+          stage: 'journal',
           mood,
           prompt: activity.title === 'Joy Jar Entry' ? 'What made you happy today?' : undefined
         });
@@ -76,7 +91,7 @@ function App() {
 
   const handleBack = () => {
     if (appState.stage === 'mood-selection') return;
-    
+
     if (appState.stage === 'mood-content') {
       setAppState({ stage: 'mood-selection' });
     } else {
@@ -87,6 +102,11 @@ function App() {
       setAppState({ stage: 'mood-content', mood, intensity });
     }
   };
+// Show auth page if user is not logged in
+  if (!user) {
+    return <AuthPage onLogin={handleLogin} />;
+  }
+
   switch (appState.stage) {
     case 'mood-selection':
       return <MoodSelector onMoodSelect={handleMoodSelect} />;

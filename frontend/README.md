@@ -19,6 +19,7 @@ frontend/
 ├── components/
 │   ├── MoodSelector.tsx      # Initial mood selection
 │   ├── MoodContent.tsx       # Activity suggestions
+│   ├── AuthPage.tsx          # Login / Sign in
 │   ├── MusicPlayer.tsx       # AI-powered music player
 │   ├── AffirmationsPlayer.tsx # AI affirmations
 │   ├── BreathingExercise.tsx # Guided breathing

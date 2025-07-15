@@ -1,34 +1,96 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Plus, Heart, Camera, Mic, Calendar, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Plus, Heart, Calendar, Trash2 } from 'lucide-react';
 import { JoyMoment } from '../types';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface JoyJarProps {
   onBack: () => void;
 }
 
 export default function JoyJar({ onBack }: JoyJarProps) {
-  const [joyMoments, setJoyMoments] = useLocalStorage<JoyMoment[]>('joy-moments', []);
+  const [joyMoments, setJoyMoments] = useState<JoyMoment[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMoment, setNewMoment] = useState({ title: '', description: '' });
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleAddMoment = () => {
-    if (!newMoment.title.trim()) return;
+  // Load joy moments from database
+  useEffect(() => {
+    loadJoyMoments();
+  }, []);
 
-    const moment: JoyMoment = {
-      id: Date.now().toString(),
-      title: newMoment.title,
-      description: newMoment.description,
-      timestamp: new Date()
-    };
+  const loadJoyMoments = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${apiUrl}/api/joy/moments`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-    setJoyMoments(prev => [moment, ...prev]);
-    setNewMoment({ title: '', description: '' });
-    setShowAddForm(false);
+      if (response.ok) {
+        const data = await response.json();
+        const moments = data.moments.map((moment: any) => ({
+          id: moment._id,
+          title: moment.title,
+          description: moment.description,
+          timestamp: new Date(moment.timestamp)
+        }));
+        setJoyMoments(moments);
+      }
+    } catch (error) {
+      console.error('Failed to load joy moments:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const deleteMoment = (id: string) => {
-    setJoyMoments(prev => prev.filter(moment => moment.id !== id));
+  const handleAddMoment = async () => {
+    if (!newMoment.title.trim()) return;
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${apiUrl}/api/joy/moments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: newMoment.title,
+          description: newMoment.description,
+        }),
+      });
+
+      if (response.ok) {
+        // Reload moments from database
+        await loadJoyMoments();
+        setNewMoment({ title: '', description: '' });
+        setShowAddForm(false);
+      }
+    } catch (error) {
+      console.error('Failed to save joy moment:', error);
+    }
+  };
+
+  const deleteMoment = async (id: string) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`${apiUrl}/api/joy/moments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        // Reload moments from database
+        await loadJoyMoments();
+      }
+    } catch (error) {
+      console.error('Failed to delete joy moment:', error);
+    }
   };
 
   const getRandomMoment = () => {
@@ -149,7 +211,12 @@ export default function JoyJar({ onBack }: JoyJarProps) {
           </div>
         )}
 
-        {joyMoments.length === 0 ? (
+        {isLoading ? (
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 text-center">
+            <div className="text-4xl mb-4">⏳</div>
+            <p className="text-gray-600">Loading your joy moments...</p>
+          </div>
+        ) : joyMoments.length === 0 ? (
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 text-center">
             <div className="text-6xl mb-4">🫙</div>
             <h3 className="font-semibold text-gray-800 mb-2">Your Joy Jar is Empty</h3>
