@@ -69,8 +69,10 @@ export default function JournalingSpace({ mood, prompt, onBack }: JournalingSpac
 
   const loadJournalEntries = async () => {
     try {
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const token = localStorage.getItem('auth_token');
-      const response = await fetch('/api/journal/entries', {
+      const response = await fetch(`${apiUrl}/api/journal/entries`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -98,8 +100,9 @@ export default function JournalingSpace({ mood, prompt, onBack }: JournalingSpac
     if (!currentEntry.trim()) return;
 
     try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
       const token = localStorage.getItem('auth_token');
-      const response = await fetch('/api/journal/entries', {
+      const response = await fetch(`${apiUrl}/api/journal/entries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

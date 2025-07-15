@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi import Depends
+from fastapi import Header
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional, Dict, Any
 import uvicorn
@@ -47,13 +48,11 @@ LLM_SERVICE_URL = os.getenv("LLM_SERVICE_URL", "http://localhost:8080")
 
 
 # Dependency to get current user from token
-async def get_current_user(authorization: str = Depends(lambda: None)):
-    """Get current user from Authorization header"""
+async def get_current_user(authorization: str = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Authorization header required")
 
     try:
-        # Extract token from "Bearer <token>"
         token = authorization.replace("Bearer ", "")
         user = await auth_service.verify_token(token)
         return user

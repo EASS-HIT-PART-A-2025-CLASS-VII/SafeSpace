@@ -44,17 +44,14 @@ uvicorn main:app --reload
 - `GET /user/preferences` - Get user preferences
 - `PUT /user/preferences` - Update user preferences
 - `GET /user/mood-history` - Get mood history
-- `GET /user/playlist-history` - Get playlist history
 
 ## Architecture
 
 - **Backend**: FastAPI with Pydantic for request validation
 - **Mood Agent**: Parses user intent from multiple sources
 - **Music Engine**: Queries Spotify/YouTube APIs
-- **User DB Service**: Stores user data and history
+- **User DB Service**: Stores user data and history using MongoDB
 
 ## Environment Variables
 
 - `SECRET_KEY`: JWT secret key
-- `SPOTIFY_CLIENT_ID`: Spotify API client ID
-- `SPOTIFY_CLIENT_SECRET`: Spotify API client secret
